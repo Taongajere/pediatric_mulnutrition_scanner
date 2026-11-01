@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from project import display_menu, ui_register_new_child, ui_retrieve_child_info, ui_record_screening
+from project import display_menu, ui_register_new_child, ui_retrieve_child_info, ui_record_screening, ui_calculate_assessment
 
 def test_display_menu():
     # Simulate the user typing "1" and pressing Enter
@@ -28,3 +28,19 @@ def test_ui_record_screening():
         # If the dummy child or officer 1 doesn't exist in the DB, it returns None.
         # If they do exist, it returns the integer visit_id.
         assert visit_id is None or isinstance(visit_id, int)
+
+def test_ui_calculate_assessment():
+    # Scenario 1: Child not found (Early Exit)
+    # The function only asks for the Child ID, then stops.
+    with patch("builtins.input", side_effect=["BADID99"]):
+        with patch("project.get_latest_screening_visit", return_value=None):
+            ui_calculate_assessment()  # Should print "No screening visit found"
+
+    # Scenario 2: Child found, user chooses to save
+    # The function asks 3 questions: Child ID, Save Choice, Visit ID
+    dummy_visit = {"muac_mm": 112.0, "oedema_status": "absent"}
+    
+    with patch("builtins.input", side_effect=["TEST1234", "yes", "1"]):
+        with patch("project.get_latest_screening_visit", return_value=dummy_visit):
+            with patch("project.save_assessment", return_value=1):
+                ui_calculate_assessment()

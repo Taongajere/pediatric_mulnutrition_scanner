@@ -1,6 +1,7 @@
 import sys 
 from nutri_track.children import register_child, get_child
-from nutri_track.screening import record_screening_visit
+from nutri_track.screening import record_screening_visit, get_latest_screening_visit
+from nutri_track.assesment import calculate_assessment, save_assessment
 
 def main():
     while True: 
@@ -11,6 +12,8 @@ def main():
             ui_retrieve_child_info()
         elif choice == '3':
             ui_record_screening()
+        elif choice == '4':
+            ui_calculate_assessment()
         elif choice == '8':
             print("Exiting the program.")
             sys.exit()
@@ -22,6 +25,7 @@ def display_menu():
     print("1. Register a new child")
     print("2. Retrieve child information")
     print("3. Record screening visit")
+    print("4. Calculate nutritional assessment")
     print("8. Exit")
     return input("Enter your choice: ")
 
@@ -41,7 +45,6 @@ def ui_retrieve_child_info():
     print(f"Child Information: {child_info}" if child_info else "Child not found.")
 
 def ui_record_screening():
-    """4. Add the new UI function to collect measurements."""
     print("\n--- Record Screening Visit ---")
     child_id = input("Enter NutriTrack ID: ").strip().upper()
     weight = float(input("Weight (kg): ").strip())
@@ -57,6 +60,28 @@ def ui_record_screening():
     else:
         print("Failed to record visit. Ensure the Child ID is correct.")
     return visit_id
+
+def ui_calculate_assessment():
+    print("\n--- Calculate Nutritional Assessment ---")
+
+    child_id = input("Enter NutriTrack ID: ").strip().upper()
+
+    # retreive latest screening data for a child
+    visit = get_latest_screening_visit("data/nutritrack.db", child_id)
+    if not visit:
+        print("No screening visit found for the specified child.")
+        return
+
+    assessment = calculate_assessment(visit['muac_mm'], visit['oedema_status'])
+    print(f"Assessment Result: {assessment}")
+
+    # Optionally save the assessment to the database
+    save_choice = input("Do you want to save this assessment? (yes/no): ").strip().lower()
+    if save_choice == 'yes':
+        visit_id = int(input("Enter the visit ID associated with this assessment: ").strip())
+        saved_id = save_assessment("data/nutritrack.db", visit_id, assessment)
+        print(f"Assessment saved with ID {saved_id}" if saved_id else "Failed to save assessment.")
+
 
 if __name__ == "__main__":
     main()
