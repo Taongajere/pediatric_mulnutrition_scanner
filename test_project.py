@@ -30,19 +30,28 @@ def test_ui_record_screening():
         assert visit_id is None or isinstance(visit_id, int)
 
 def test_ui_calculate_assessment():
-    # Scenario 1: Child not found (Early Exit)
-    # The function only asks for the Child ID, then stops.
+    # Scenario 1: Child not found in database (Early Exit)
+    # Only 1 input is triggered: Child ID
     with patch("builtins.input", side_effect=["BADID99"]):
         with patch("project.get_latest_screening_visit", return_value=None):
-            ui_calculate_assessment()  # Should print "No screening visit found"
+            ui_calculate_assessment()
 
-    # Scenario 2: Child found, user chooses to save
-    # The function asks 3 questions: Child ID, Save Choice, Visit ID
-    dummy_visit = {"muac_mm": 112.0, "oedema_status": "absent"}
+    # Scenario 2: Child found, SAM detected, user chooses NOT to refer right now
+    # 2 inputs are triggered: Child ID, then the Referral prompt (because SAM is present)
+    sam_visit = {"visit_id": 1, "muac_mm": 112.0, "oedema_status": "present"}
     
-    with patch("builtins.input", side_effect=["TEST1234", "yes", "1", "no"]):
-        with patch("project.get_latest_screening_visit", return_value=dummy_visit):
+    with patch("builtins.input", side_effect=["TEST1234", "no"]):
+        with patch("project.get_latest_screening_visit", return_value=sam_visit):
             with patch("project.save_assessment", return_value=1):
+                ui_calculate_assessment()
+
+    # Scenario 3: Child found, NO SAM detected (Normal)
+    # Only 1 input is triggered: Child ID (the referral prompt is bypassed completely)
+    normal_visit = {"visit_id": 2, "muac_mm": 130.0, "oedema_status": "absent"}
+    
+    with patch("builtins.input", side_effect=["TEST5678"]):
+        with patch("project.get_latest_screening_visit", return_value=normal_visit):
+            with patch("project.save_assessment", return_value=2):
                 ui_calculate_assessment()
 
 

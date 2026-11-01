@@ -35,21 +35,33 @@ def record_screening_visit(db_path, child_id, officer_id, settlement_id, weight,
     finally:
         conn.close()
 
-def get_latest_screening_visit(db_path, child_id):
-    """Retrieves the most recent screening visit for a given child."""
+def get_latest_screening_visit(db_path, child_string_id):
+    """
+    Fetches the most recent screening visit measurements for a child.
+    Includes the specific visit_id needed to save subsequent assessments.
+    """
     conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row  # Allows accessing columns by name
-
+    conn.row_factory = sqlite3.Row 
     cursor = conn.cursor()
-
-    cursor.execute('''
-        SELECT visit_id, muac_mm, oedema_status
-        FROM screening_visits
-        WHERE child_id = ?
-        ORDER BY visit_date DESC
-        LIMIT 1
-    ''', (child_id,))
-
-    visit = cursor.fetchone()
-    conn.close()
-    return dict(visit) if visit else None
+    
+    try:
+        # Join the tables to find the child's most recent visit and measurements
+        cursor.execute('''
+            SELECT s.id AS visit_id, m.muac_mm, m.oedema_status
+            FROM children c
+            JOIN screening_visits s ON c.id = s.child_id
+            JOIN measurements m ON s.id = m.visit_id
+            WHERE c.child_id = ?
+            ORDER BY s.visit_date DESC, s.id DESC
+            LIMIT 1
+        ''', (child_string_id,))
+        
+        row = cursor.fetchone()
+        if row:
+            return dict(row)
+        return None
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()

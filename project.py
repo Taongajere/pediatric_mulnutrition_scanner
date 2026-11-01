@@ -83,20 +83,22 @@ def ui_calculate_assessment():
     visit = get_latest_screening_visit("data/nutritrack.db", child_id)
     if not visit:
         print("No screening visit found for the specified child.")
-        return
+        return None
+
+    visit_id = visit['visit_id']
 
     assessment = calculate_assessment(visit['muac_mm'], visit['oedema_status'])
     print(f"Assessment Result: {assessment}")
     print(f"Classification: {assessment['muac_classification']}")
     print(f"Action: {assessment['overall_flag']}")
 
-    # save the assessment to the database
-    save_choice = input("Do you want to save this assessment? (yes/no): ").strip().lower()
-    if save_choice == 'yes':
-        visit_id = int(input("Enter the visit ID associated with this assessment: ").strip())
-        saved_id = save_assessment("data/nutritrack.db", visit_id, assessment)
-        print(f"Assessment saved with ID {saved_id}" if saved_id else "Failed to save assessment.")
-
+    # automatically save the assessment
+    saved_id = save_assessment("data/nutritrack.db", visit_id, assessment)
+    if saved_id:
+        print(f"Assessment saved automatically with ID {saved_id}.")
+    else:
+        print("Failed to save assessment to the database.")
+    
     # flag assesment to automatically trigger referral if SAM is detected
     if "Severe" in assessment['muac_classification']:
         print("\n*** URGENT: SAM DETECTED ***")
