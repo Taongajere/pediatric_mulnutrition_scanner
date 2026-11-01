@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from project import display_menu, ui_register_new_child, ui_retrieve_child_info, ui_record_screening, ui_calculate_assessment, ui_create_referral, ui_enroll_child
+from project import display_menu, ui_register_new_child, ui_retrieve_child_info, ui_record_screening, ui_calculate_assessment, ui_create_referral, ui_enroll_child, ui_export_data 
 
 def test_display_menu():
     # Simulate the user typing "1" and pressing Enter
@@ -75,3 +75,19 @@ def test_ui_enroll_child():
     with patch("builtins.input", side_effect=["SC"]):
         enrolment_id = ui_enroll_child(child_id="TEST5678")
         assert enrolment_id is None or isinstance(enrolment_id, int)
+
+def test_ui_export_data():
+    # Scenario 1: User provides a custom filename without the .csv extension
+    # We patch the backend function to simulate successfully exporting 5 rows, 
+    # so we don't actually create a file during the test.
+    with patch("builtins.input", return_value="my_custom_report"):
+        with patch("project.export_assessments_to_csv", return_value=5):
+            rows = ui_export_data()
+            assert rows == 5
+
+    # Scenario 2: User just presses Enter (empty input)
+    # This tests the fallback logic that defaults to "data_export.csv"
+    with patch("builtins.input", return_value=""):
+        with patch("project.export_assessments_to_csv", return_value=0):
+            rows = ui_export_data()
+            assert rows == 0

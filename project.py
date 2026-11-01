@@ -4,6 +4,7 @@ from nutri_track.screening import record_screening_visit, get_latest_screening_v
 from nutri_track.assesment import calculate_assessment, save_assessment
 from nutri_track.referals import create_referral
 from nutri_track.enrollment import enroll_child
+from nutri_track.reports import export_assessments_to_csv
 
 
 def main():
@@ -21,6 +22,8 @@ def main():
             ui_create_referral()
         elif choice == '6':
             ui_enroll_child()
+        elif choice == '7':
+            ui_export_data()
         elif choice == '8':
             print("Exiting the program.")
             sys.exit()
@@ -34,6 +37,8 @@ def display_menu():
     print("3. Record screening visit")
     print("4. Calculate nutritional assessment")
     print("5. Create referral")
+    print("6. Enroll child in feeding programme")
+    print("7. Export assessments to CSV")
     print("8. Exit")
     return input("Enter your choice: ")
 
@@ -148,6 +153,30 @@ def ui_enroll_child(child_id=None):
         print("Failed to enroll child. Verify the Child ID exists.")
         
     return enrolment_id
+
+def ui_export_data():
+    print("\n--- Export Data ---")
+    filename = input("Enter output filename (default: data_export.csv): ").strip()
+    
+    # Apply default filename if user just presses Enter
+    if not filename:
+        filename = "data_export.csv"
+        
+    # Ensure it ends with .csv
+    if not filename.endswith(".csv"):
+        filename += ".csv"
+        
+    print(f"Extracting records to {filename}...")
+    
+    rows_exported = export_assessments_to_csv("data/nutritrack.db", filename)
+    
+    if rows_exported is not None:
+        print(f"Success! {rows_exported} screening records exported to {filename}.")
+    else:
+        print("Failed to export data.")
+        
+    return rows_exported
+
 
 if __name__ == "__main__":
     main()
