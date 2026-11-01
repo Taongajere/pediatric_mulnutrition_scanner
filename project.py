@@ -2,7 +2,7 @@ import sys
 from nutri_track.children import register_child, get_child
 from nutri_track.screening import record_screening_visit, get_latest_screening_visit
 from nutri_track.assesment import calculate_assessment, save_assessment
-
+from nutri_track.referals import create_referral
 def main():
     while True: 
         choice = display_menu()
@@ -14,6 +14,8 @@ def main():
             ui_record_screening()
         elif choice == '4':
             ui_calculate_assessment()
+        elif choice == '5':
+            ui_create_referral()
         elif choice == '8':
             print("Exiting the program.")
             sys.exit()
@@ -26,6 +28,7 @@ def display_menu():
     print("2. Retrieve child information")
     print("3. Record screening visit")
     print("4. Calculate nutritional assessment")
+    print("5. Create referral")
     print("8. Exit")
     return input("Enter your choice: ")
 
@@ -82,6 +85,27 @@ def ui_calculate_assessment():
         saved_id = save_assessment("data/nutritrack.db", visit_id, assessment)
         print(f"Assessment saved with ID {saved_id}" if saved_id else "Failed to save assessment.")
 
+def ui_create_referral():
+    print("\n--- Issue Clinical Referral ---")
+    child_id = input("Enter NutriTrack ID: ").strip().upper()
+    visit_id = input("Enter Screening Visit ID: ").strip()
+    
+    if not visit_id.isdigit():
+        print("Error: Visit ID must be a number.")
+        return None
+        
+    facility = input("Referral Facility (e.g., Lubuto Clinic): ").strip()
+    reason = input("Reason for Referral (e.g., SAM with oedema): ").strip()
+    urgency = input("Urgency (High/Medium/Low): ").strip().capitalize()
+    
+    referral_id = create_referral("data/nutritrack.db", child_id, int(visit_id), facility, reason, urgency)
+    
+    if referral_id:
+        print(f"Success! Referral {referral_id} issued to {facility}. Status set to 'Pending'.")
+    else:
+        print("Failed to issue referral. Verify the Child ID and Visit ID exist.")
+        
+    return referral_id
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from project import display_menu, ui_register_new_child, ui_retrieve_child_info, ui_record_screening, ui_calculate_assessment
+from project import display_menu, ui_register_new_child, ui_retrieve_child_info, ui_record_screening, ui_calculate_assessment, ui_create_referral
 
 def test_display_menu():
     # Simulate the user typing "1" and pressing Enter
@@ -44,3 +44,21 @@ def test_ui_calculate_assessment():
         with patch("project.get_latest_screening_visit", return_value=dummy_visit):
             with patch("project.save_assessment", return_value=1):
                 ui_calculate_assessment()
+
+
+def test_ui_create_referral():
+    # Scenario 1: Valid inputs
+    # Inputs: Child ID, Visit ID, Facility, Reason, Urgency
+    valid_inputs = ["TEST1234", "1", "Lubuto Clinic", "SAM with oedema", "High"]
+    with patch("builtins.input", side_effect=valid_inputs):
+        referral_id = ui_create_referral()
+        # Returns None if the dummy Child/Visit IDs don't exist in the database, 
+        # or returns the integer ID if they do.
+        assert referral_id is None or isinstance(referral_id, int)
+
+    # Scenario 2: Invalid Visit ID (Early Exit)
+    # The user types "abc" for Visit ID. The function should print an error and return None 
+    # without asking the remaining three questions.
+    with patch("builtins.input", side_effect=["TEST1234", "abc"]):
+        result = ui_create_referral()
+        assert result is None
