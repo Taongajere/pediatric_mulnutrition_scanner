@@ -112,9 +112,9 @@ def init_db(db_path = "data/nutri_track.db"):
             enrolment_id INTEGER PRIMARY KEY AUTOINCREMENT,
             child_id TEXT NOT NULL,
             programme_type TEXT,
-            start_date DATE NOT NULL,
+            admission_date DATE NOT NULL,
             end_date DATE,
-            programme_status TEXT,
+            status TEXT,
             exit_reason TEXT,
             FOREIGN KEY (child_id) REFERENCES children (child_id)
         )

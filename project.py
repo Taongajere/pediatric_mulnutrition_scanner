@@ -3,6 +3,7 @@ from nutri_track.children import register_child, get_child
 from nutri_track.screening import record_screening_visit, get_latest_screening_visit
 from nutri_track.assesment import calculate_assessment, save_assessment
 from nutri_track.referals import create_referral
+from nutri_track.enrollment import enroll_child
 
 
 def main():
@@ -18,6 +19,8 @@ def main():
             ui_calculate_assessment()
         elif choice == '5':
             ui_create_referral()
+        elif choice == '6':
+            ui_enroll_child()
         elif choice == '8':
             print("Exiting the program.")
             sys.exit()
@@ -127,6 +130,24 @@ def ui_create_referral(child_id=None, visit_id=None):
         print("Failed to issue referral. Verify the Child ID and Visit ID exist.")
         
     return referral_id
+
+def ui_enroll_child(child_id=None):
+    print("\n--- Enroll in Feeding Programme ---")
+
+    if not child_id:
+        child_id = input("Enter NutriTrack ID: ").strip().upper()
+        
+    print("Available Programs: SC (Stabilization Centre), OTP (Outpatient Therapeutic), SFP (Supplementary Feeding)")
+    program = input("Enter Program Type (SC/OTP/SFP): ").strip().upper()
+    
+    enrolment_id = enroll_child("data/nutritrack.db", child_id, program)
+    
+    if enrolment_id:
+        print(f"Success! Child {child_id} enrolled in {program}. Status set to 'Active'.")
+    else:
+        print("Failed to enroll child. Verify the Child ID exists.")
+        
+    return enrolment_id
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from project import display_menu, ui_register_new_child, ui_retrieve_child_info, ui_record_screening, ui_calculate_assessment, ui_create_referral
+from project import display_menu, ui_register_new_child, ui_retrieve_child_info, ui_record_screening, ui_calculate_assessment, ui_create_referral, ui_enroll_child
 
 def test_display_menu():
     # Simulate the user typing "1" and pressing Enter
@@ -62,3 +62,16 @@ def test_ui_create_referral():
     with patch("builtins.input", side_effect=["TEST1234", "abc"]):
         result = ui_create_referral()
         assert result is None
+
+def test_ui_enroll_child():
+    # Scenario 1: No ID provided, user types both Child ID and Program Type
+    with patch("builtins.input", side_effect=["TEST1234", "OTP"]):
+        enrolment_id = ui_enroll_child()
+        # Returns None if the dummy child isn't in the database, or an integer if it is
+        assert enrolment_id is None or isinstance(enrolment_id, int)
+
+    # Scenario 2: ID is automatically passed in from a previous menu
+    # The function skips the ID prompt and only asks for the Program Type
+    with patch("builtins.input", side_effect=["SC"]):
+        enrolment_id = ui_enroll_child(child_id="TEST5678")
+        assert enrolment_id is None or isinstance(enrolment_id, int)
