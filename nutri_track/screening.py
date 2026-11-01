@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import date
 
-def record_screening_visit(db_path, child_id, officer_id, settlement_id, weight, height):
+def record_screening_visit(db_path, child_id, officer_id, settlement_id, weight, height, muac_mm, oedema_status):
     """Records a new screening visit and its corresponding measurements."""
     visit_date = date.today().isoformat()
     
@@ -21,9 +21,10 @@ def record_screening_visit(db_path, child_id, officer_id, settlement_id, weight,
         # 2. Create the linked measurement record
         cursor.execute('''
             INSERT INTO measurements (
-                visit_id, weight_kg, height_length_cm
-            ) VALUES (?, ?, ?)
-        ''', (visit_id, weight, height))
+                visit_id, weight_kg, height_length_cm, muac_mm, oedema_status
+            ) VALUES (?, ?, ?, ?, ?)
+        ''', (visit_id, weight, height, muac_mm, oedema_status))
+
         
         conn.commit()
         return visit_id

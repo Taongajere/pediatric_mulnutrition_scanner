@@ -46,10 +46,12 @@ def ui_record_screening():
     child_id = input("Enter NutriTrack ID: ").strip().upper()
     weight = float(input("Weight (kg): ").strip())
     height = float(input("Height/Length (cm): ").strip())
-    
+    muac_mm = float(input("MUAC (mm): ").strip())
+    oedema_status = input("Oedema status (present/absent): ").strip().lower()
+
     # Hardcoding officer 1 and settlement 1 for testing purposes
-    visit_id = record_screening_visit("data/nutritrack.db", child_id, 1, 1, weight, height)
-    
+    visit_id = record_screening_visit("data/nutritrack.db", child_id, 1, 1, weight, height, muac_mm, oedema_status)
+
     if visit_id:
         print(f"Success! Visit recorded with ID {visit_id}")
     else:

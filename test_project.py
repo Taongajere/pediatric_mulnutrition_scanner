@@ -21,8 +21,8 @@ def test_ui_retrieve_child_info():
         assert record is None or isinstance(record, tuple)
 
 def test_ui_record_screening():
-    # Provide inputs in the exact order requested: Child ID, Weight, Height
-    with patch("builtins.input", side_effect=["ABC12345", "11.5", "82.0"]):
+    # Provide inputs in the exact order requested: Child ID, Weight, Height, MUAC, Oedema Status
+    with patch("builtins.input", side_effect=["ABC12345", "11.5", "82.0", "120", "absent"]):
         visit_id = ui_record_screening()
         
         # If the dummy child or officer 1 doesn't exist in the DB, it returns None.
