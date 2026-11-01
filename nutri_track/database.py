@@ -96,11 +96,12 @@ def init_db(db_path = "data/nutri_track.db"):
         CREATE TABLE IF NOT EXISTS referrals (
             referral_id INTEGER PRIMARY KEY AUTOINCREMENT,
             visit_id INTEGER NOT NULL,
+            child_id TEXT NOT NULL,
+            referral_facility TEXT,
             referral_reason TEXT,
-            destination TEXT,
+            urgency_level TEXT,
             referral_date DATE NOT NULL,
-            referral_status TEXT,
-            outcome TEXT,
+            status TEXT,
             FOREIGN KEY (visit_id) REFERENCES screening_visits (visit_id)
         )
     ''')

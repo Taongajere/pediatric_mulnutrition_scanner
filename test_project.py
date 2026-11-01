@@ -22,7 +22,7 @@ def test_ui_retrieve_child_info():
 
 def test_ui_record_screening():
     # Provide inputs in the exact order requested: Child ID, Weight, Height, MUAC, Oedema Status
-    with patch("builtins.input", side_effect=["ABC12345", "11.5", "82.0", "120", "absent"]):
+    with patch("builtins.input", side_effect=["ABC12345", "11.5", "82.0", "120", "present", "no"]):
         visit_id = ui_record_screening()
         
         # If the dummy child or officer 1 doesn't exist in the DB, it returns None.
@@ -40,7 +40,7 @@ def test_ui_calculate_assessment():
     # The function asks 3 questions: Child ID, Save Choice, Visit ID
     dummy_visit = {"muac_mm": 112.0, "oedema_status": "absent"}
     
-    with patch("builtins.input", side_effect=["TEST1234", "yes", "1"]):
+    with patch("builtins.input", side_effect=["TEST1234", "yes", "1", "no"]):
         with patch("project.get_latest_screening_visit", return_value=dummy_visit):
             with patch("project.save_assessment", return_value=1):
                 ui_calculate_assessment()

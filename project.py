@@ -3,6 +3,8 @@ from nutri_track.children import register_child, get_child
 from nutri_track.screening import record_screening_visit, get_latest_screening_visit
 from nutri_track.assesment import calculate_assessment, save_assessment
 from nutri_track.referals import create_referral
+
+
 def main():
     while True: 
         choice = display_menu()
@@ -77,18 +79,30 @@ def ui_calculate_assessment():
 
     assessment = calculate_assessment(visit['muac_mm'], visit['oedema_status'])
     print(f"Assessment Result: {assessment}")
+    print(f"Classification: {assessment['muac_classification']}")
+    print(f"Action: {assessment['overall_flag']}")
 
-    # Optionally save the assessment to the database
+    # save the assessment to the database
     save_choice = input("Do you want to save this assessment? (yes/no): ").strip().lower()
     if save_choice == 'yes':
         visit_id = int(input("Enter the visit ID associated with this assessment: ").strip())
         saved_id = save_assessment("data/nutritrack.db", visit_id, assessment)
         print(f"Assessment saved with ID {saved_id}" if saved_id else "Failed to save assessment.")
 
-def ui_create_referral():
+    # flag assesment to automatically trigger referral if SAM is detected
+    if "Severe" in assessment['muac_classification']:
+        print("\n*** URGENT: SAM DETECTED ***")
+        refer = input("Would you like to issue a referral now? (yes/no): ").strip().lower()
+        if refer == 'yes':
+            # Pass the known IDs directly to the referral function
+            ui_create_referral(child_id=child_id, visit_id=visit_id)
+
+def ui_create_referral(child_id=None, visit_id=None):
     print("\n--- Issue Clinical Referral ---")
-    child_id = input("Enter NutriTrack ID: ").strip().upper()
-    visit_id = input("Enter Screening Visit ID: ").strip()
+    if child_id is None:
+        child_id = input("Enter NutriTrack ID: ").strip().upper()
+    if visit_id is None:
+        visit_id = input("Enter Screening Visit ID: ").strip()
     
     if not visit_id.isdigit():
         print("Error: Visit ID must be a number.")
@@ -98,7 +112,14 @@ def ui_create_referral():
     reason = input("Reason for Referral (e.g., SAM with oedema): ").strip()
     urgency = input("Urgency (High/Medium/Low): ").strip().capitalize()
     
-    referral_id = create_referral("data/nutritrack.db", child_id, int(visit_id), facility, reason, urgency)
+    referral_id = create_referral(
+        "data/nutritrack.db", 
+        child_id,
+        int(visit_id),
+        facility,
+        reason,
+        urgency
+    )
     
     if referral_id:
         print(f"Success! Referral {referral_id} issued to {facility}. Status set to 'Pending'.")
