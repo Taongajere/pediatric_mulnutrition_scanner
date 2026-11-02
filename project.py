@@ -1,4 +1,5 @@
 import sys 
+from datetime import datetime
 from nutri_track.children import register_child, get_child
 from nutri_track.screening import record_screening_visit, get_latest_screening_visit
 from nutri_track.assesment import calculate_assessment, save_assessment
@@ -46,6 +47,25 @@ def ui_register_new_child():
     print("\n--- Register a New Child ---")
     sex = input("Enter child's sex (M/F): ").strip().upper()
     date_of_birth = input("Enter child's date of birth (YYYY-MM-DD): ").strip()
+
+    #child must be less than 5 years old to register, and date of birth cannot be in the future
+    try: 
+        dob_obj = datetime.strptime(date_of_birth, "%Y-%m-%d").date()
+
+        age_in_years = (datetime.now().date() - dob_obj).days // 365
+
+        if age_in_years > 5:
+            print("Error: Child must be under 5 years old to register.")
+            return None
+        if age_in_years < 0:
+            print("Error: Date of birth cannot be in the future.")
+            return None
+        
+    except ValueError:
+        print("Error: Invalid date format. Please use YYYY-MM-DD.")
+        return None
+    #-------------------------------------------------------------------------------------
+    
     dob_is_estimated = input("Is the date of birth estimated? (yes/no): ").strip().lower() == 'yes'
     child_id = register_child("data/nutritrack.db", date_of_birth, dob_is_estimated, None, sex, 1)  # Assuming settlement_id is 1 for simplicity
     print(f'success! Child ID is {child_id}' if child_id else 'Failed to register child.')

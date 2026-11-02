@@ -6,12 +6,22 @@ def test_display_menu():
     with patch("builtins.input", return_value="1"):
         assert display_menu() == "1"
 
-def test_ui_register_new_child():
-    # side_effect passes a list of inputs in the exact order they are asked: Sex, then DOB
-    with patch("builtins.input", side_effect=["M", "2023-08-14", "no"]):
-        child_id = ui_register_new_child()
-        assert child_id is not None
-        assert len(child_id) == 8
+def test_ui_register_new_child_age_validation():
+    # Scenario 1: Child is too old (6 years old)
+    # The current year is 2026, so a child born in 2020 is rejected.
+    with patch("builtins.input", side_effect=["M", "2020-01-01"]):
+        result = ui_register_new_child()
+        assert result is None
+
+    # Scenario 2: Date is in the future
+    with patch("builtins.input", side_effect=["F", "2030-05-15"]):
+        result = ui_register_new_child()
+        assert result is None
+
+    # Scenario 3: User types the date in the wrong format (DD-MM-YYYY)
+    with patch("builtins.input", side_effect=["M", "15-05-2025"]):
+        result = ui_register_new_child()
+        assert result is None
 
 def test_ui_retrieve_child_info():
     # Simulate looking up a hypothetical ID
