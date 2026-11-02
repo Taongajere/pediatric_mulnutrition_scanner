@@ -46,6 +46,17 @@ def display_menu():
 def ui_register_new_child():
     print("\n--- Register a New Child ---")
     sex = input("Enter child's sex (M/F): ").strip().upper()
+
+    # child must be M/F
+    try:
+        if sex not in ['M', 'F']:
+            print("Error: Sex must be 'M' or 'F'.")
+            return None
+    except ValueError:
+        print("Error: Invalid input for sex.")
+        return None
+
+
     date_of_birth = input("Enter child's date of birth (YYYY-MM-DD): ").strip()
 
     #child must be less than 5 years old to register, and date of birth cannot be in the future
@@ -65,7 +76,7 @@ def ui_register_new_child():
         print("Error: Invalid date format. Please use YYYY-MM-DD.")
         return None
     #-------------------------------------------------------------------------------------
-    
+
     dob_is_estimated = input("Is the date of birth estimated? (yes/no): ").strip().lower() == 'yes'
     child_id = register_child("data/nutritrack.db", date_of_birth, dob_is_estimated, None, sex, 1)  # Assuming settlement_id is 1 for simplicity
     print(f'success! Child ID is {child_id}' if child_id else 'Failed to register child.')
