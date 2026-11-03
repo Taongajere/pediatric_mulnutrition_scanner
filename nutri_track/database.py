@@ -123,12 +123,12 @@ def init_db(db_path = "data/nutri_track.db"):
     # Seed initial default records
     cursor.execute('''
         INSERT OR IGNORE INTO Settlements (settlement_id, settlement_name, district, province)
-        VALUES ('set-01', 'Twapia', 'Ndola', 'Copperbelt');
+        VALUES ('S01', 'Twapia', 'Ndola', 'Copperbelt');
     ''')
 
     cursor.execute('''
         INSERT OR IGNORE INTO Officers (officer_id, officer_code, display_name, role)
-        VALUES ('off-01', 'OFF-001', 'Default Officer', 'Health Worker');
+        VALUES ('OFF-01', 'OFF-001', 'Default Officer', 'Health Worker');
     ''')
 
     conn.commit()

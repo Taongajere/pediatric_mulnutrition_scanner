@@ -73,7 +73,7 @@ def ui_register_new_child():
     #-------------------------------------------------------------------------------------
 
     dob_is_estimated = input("Is the date of birth estimated? (yes/no): ").strip().lower() == 'yes'
-    child_id = register_child("data/nutritrack.db", date_of_birth, dob_is_estimated, age_in_months * 12, sex, "set-01")  # Assuming settlement_id is "set-01" for simplicity
+    child_id = register_child("data/nutritrack.db", date_of_birth, dob_is_estimated, age_in_months * 12, sex, "S01")  # Assuming settlement_id is "S01" for simplicity
     print(f'success! Child ID is {child_id}' if child_id else 'Failed to register child.')
     return child_id
 
@@ -115,7 +115,7 @@ def ui_record_screening():
             )
 
     # Hardcoding officer 1 and settlement 1 for testing purposes
-    visit_id = record_screening_visit("data/nutritrack.db", child_id, "off-01", "set-01", weight, height, muac_mm, oedema_status, visit_type, measurement_position, age_in_months_at_visit)
+    visit_id = record_screening_visit("data/nutritrack.db", child_id, "OFF-01", "S01", weight, height, muac_mm, oedema_status, visit_type, measurement_position, age_in_months_at_visit)
 
     if visit_id:
         print(f"Success! Visit recorded with ID {visit_id}")
