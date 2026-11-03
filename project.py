@@ -47,16 +47,6 @@ def ui_register_new_child():
     print("\n--- Register a New Child ---")
     sex = input("Enter child's sex (M/F): ").strip().upper()
 
-    # child must be M/F
-    try:
-        if sex not in ['M', 'F']:
-            print("Error: Sex must be 'M' or 'F'.")
-            return None
-    except ValueError:
-        print("Error: Invalid input for sex.")
-        return None
-
-
     date_of_birth = input("Enter child's date of birth (YYYY-MM-DD): ").strip()
 
     #child must be less than 5 years old to register, and date of birth cannot be in the future
@@ -78,7 +68,7 @@ def ui_register_new_child():
     #-------------------------------------------------------------------------------------
 
     dob_is_estimated = input("Is the date of birth estimated? (yes/no): ").strip().lower() == 'yes'
-    child_id = register_child("data/nutritrack.db", date_of_birth, dob_is_estimated, None, sex, 1)  # Assuming settlement_id is 1 for simplicity
+    child_id = register_child("data/nutritrack.db", date_of_birth, dob_is_estimated, age_in_years * 12, sex, 1)  # Assuming settlement_id is 1 for simplicity
     print(f'success! Child ID is {child_id}' if child_id else 'Failed to register child.')
     return child_id
 
@@ -86,7 +76,18 @@ def ui_retrieve_child_info():
     print("\n--- Retrieve Child Information ---")
     child_id = input("Enter child's ID: ").strip().upper()
     child_info = get_child("data/nutritrack.db", child_id)
-    print(f"Child Information: {child_info}" if child_info else "Child not found.")
+
+    if child_info:
+        print(f"Child ID: {child_info[0]}")
+        print(f"Date of Birth: {child_info[1]}")
+        print(f"DOB Estimated: {'Yes' if child_info[2] else 'No'}")
+        print(f"Estimated Age (months): {child_info[3]}")
+        print(f"Sex: {child_info[4]}")
+        print(f"Settlement ID: {child_info[5]}")
+        print(f"Registration Date: {child_info[6]}")
+    else:
+        print("No child found with the provided ID.")
+    return child_info
 
 def ui_record_screening():
     print("\n--- Record Screening Visit ---")

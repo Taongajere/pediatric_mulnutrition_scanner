@@ -1,18 +1,22 @@
 import sqlite3
-import uuid 
 from datetime import datetime
 
-def generate_child_id():
+def generate_child_id(cursor, settlement_id):
     """Generate a unique child ID using UUID4."""
-    return str(uuid.uuid4())[:8].upper()
-    
+    cursor.execute("SELECT COUNT(*) FROM children")
+    count = cursor.fetchone()[0]
+    next_sequence = count + 1
+
+    return f"{settlement_id}-NUTRI-{next_sequence:03d}"
+
 def register_child(db_path, date_of_birth, dob_is_estimated, estimated_age_months, sex, settlement_id):
     """Register a new child with a unique ID."""
-    child_id = generate_child_id()
     registration_date = datetime.now().date()  # Current date for registration
 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
+
+    child_id = generate_child_id(cursor, settlement_id)
 
     try:
         cursor.execute('''
