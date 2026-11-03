@@ -52,9 +52,14 @@ def ui_register_new_child():
     #child must be less than 5 years old to register, and date of birth cannot be in the future
     try: 
         dob_obj = datetime.strptime(date_of_birth, "%Y-%m-%d").date()
+        today = datetime.now().date()
 
-        age_in_years = (datetime.now().date() - dob_obj).days // 365
-
+        age_in_months = (
+            (today.year - dob_obj.year) * 12 
+            + (today.month - dob_obj.month)
+            - (today.day < dob_obj.day)
+        )
+        age_in_years = age_in_months // 12
         if age_in_years > 5:
             print("Error: Child must be under 5 years old to register.")
             return None
@@ -68,7 +73,7 @@ def ui_register_new_child():
     #-------------------------------------------------------------------------------------
 
     dob_is_estimated = input("Is the date of birth estimated? (yes/no): ").strip().lower() == 'yes'
-    child_id = register_child("data/nutritrack.db", date_of_birth, dob_is_estimated, age_in_years * 12, sex, 1)  # Assuming settlement_id is 1 for simplicity
+    child_id = register_child("data/nutritrack.db", date_of_birth, dob_is_estimated, age_in_months * 12, sex, 1)  # Assuming settlement_id is 1 for simplicity
     print(f'success! Child ID is {child_id}' if child_id else 'Failed to register child.')
     return child_id
 
