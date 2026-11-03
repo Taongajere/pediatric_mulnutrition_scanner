@@ -11,7 +11,7 @@ def init_db(db_path = "data/nutri_track.db"):
     # Create the Settlemets table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Settlements (
-            settlement_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            settlement_id TEXT PRIMARY KEY,
             settlement_name TEXT NOT NULL,
             district TEXT,
             province TEXT
@@ -21,7 +21,7 @@ def init_db(db_path = "data/nutri_track.db"):
     # Create officers table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Officers (
-            officer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            officer_id TEXT PRIMARY KEY,
             officer_code TEXT UNIQUE NOT NULL,
             display_name TEXT NOT NULL,
             role TEXT
@@ -118,6 +118,17 @@ def init_db(db_path = "data/nutri_track.db"):
             exit_reason TEXT,
             FOREIGN KEY (child_id) REFERENCES children (child_id)
         )
+    ''')
+
+    # Seed initial default records
+    cursor.execute('''
+        INSERT OR IGNORE INTO Settlements (settlement_id, settlement_name, district, province)
+        VALUES ('set-01', 'Twapia', 'Ndola', 'Copperbelt');
+    ''')
+
+    cursor.execute('''
+        INSERT OR IGNORE INTO Officers (officer_id, officer_code, display_name, role)
+        VALUES ('off-01', 'OFF-001', 'Default Officer', 'Health Worker');
     ''')
 
     conn.commit()
