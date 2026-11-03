@@ -73,7 +73,7 @@ def ui_register_new_child():
     #-------------------------------------------------------------------------------------
 
     dob_is_estimated = input("Is the date of birth estimated? (yes/no): ").strip().lower() == 'yes'
-    child_id = register_child("data/nutritrack.db", date_of_birth, dob_is_estimated, age_in_months * 12, sex, 1)  # Assuming settlement_id is 1 for simplicity
+    child_id = register_child("data/nutritrack.db", date_of_birth, dob_is_estimated, age_in_months * 12, sex, "set-01")  # Assuming settlement_id is "set-01" for simplicity
     print(f'success! Child ID is {child_id}' if child_id else 'Failed to register child.')
     return child_id
 
@@ -96,14 +96,26 @@ def ui_retrieve_child_info():
 
 def ui_record_screening():
     print("\n--- Record Screening Visit ---")
-    child_id = input("Enter NutriTrack ID: ").strip().upper()
+    child_id = input("Enter child ID: ").strip().upper()
     weight = float(input("Weight (kg): ").strip())
     height = float(input("Height/Length (cm): ").strip())
     muac_mm = float(input("MUAC (mm): ").strip())
     oedema_status = input("Oedema status (present/absent): ").strip().lower()
+    visit_type = input("Visit type (screening/follow-up): ").strip().lower()
+    measurement_position = input("Measurement position (standing/lying): ").strip().lower()
+    
+    # calculate age in months at visit based on child's date of birth
+    dob_str = get_child("data/nutritrack.db", child_id)[1]  # Retrieve date of birth from the database
+    dob_obj = datetime.strptime(dob_str, "%Y-%m-%d").date()
+    today = datetime.now().date()
+    age_in_months_at_visit = (
+                (today.year - dob_obj.year) * 12 
+                + (today.month - dob_obj.month)
+                - (today.day < dob_obj.day)
+            )
 
     # Hardcoding officer 1 and settlement 1 for testing purposes
-    visit_id = record_screening_visit("data/nutritrack.db", child_id, 1, 1, weight, height, muac_mm, oedema_status)
+    visit_id = record_screening_visit("data/nutritrack.db", child_id, "off-01", "set-01", weight, height, muac_mm, oedema_status, visit_type, measurement_position, age_in_months_at_visit)
 
     if visit_id:
         print(f"Success! Visit recorded with ID {visit_id}")
