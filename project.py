@@ -1,5 +1,6 @@
 import sys 
 from datetime import datetime
+# from colorama import init, Fore, Style
 from nutri_track.children import register_child, get_child
 from nutri_track.screening import record_screening_visit, get_latest_screening_visit
 from nutri_track.assesment import calculate_assessment, save_assessment
@@ -126,7 +127,7 @@ def ui_record_screening():
 def ui_calculate_assessment():
     print("\n--- Calculate Nutritional Assessment ---")
 
-    child_id = input("Enter NutriTrack ID: ").strip().upper()
+    child_id = input("Enter child ID: ").strip().upper()
 
     # retreive latest screening data for a child
     visit = get_latest_screening_visit("data/nutritrack.db", child_id)
@@ -139,7 +140,7 @@ def ui_calculate_assessment():
     assessment = calculate_assessment(visit['muac_mm'], visit['oedema_status'])
     print(f"Assessment Result: {assessment}")
     print(f"Classification: {assessment['muac_classification']}")
-    print(f"Action: {assessment['overall_flag']}")
+    print(f"Action: {assessment['overall_flag']}")  
 
     # automatically save the assessment
     saved_id = save_assessment("data/nutritrack.db", visit_id, assessment)
@@ -163,7 +164,9 @@ def ui_create_referral(child_id=None, visit_id=None):
     if visit_id is None:
         visit_id = input("Enter Screening Visit ID: ").strip()
     
-    if not visit_id.isdigit():
+    try:
+        visit_id = int(visit_id)
+    except (ValueError, TypeError):
         print("Error: Visit ID must be a number.")
         return None
         
@@ -176,7 +179,7 @@ def ui_create_referral(child_id=None, visit_id=None):
         child_id,
         int(visit_id),
         facility,
-        reason,
+        reason, 
         urgency
     )
     
