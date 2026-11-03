@@ -1,10 +1,10 @@
 import sqlite3
 from datetime import date
 
-def record_screening_visit(db_path, child_id, officer_id, settlement_id, weight, height, muac_mm, oedema_status):
+def record_screening_visit(db_path, child_id, officer_id, settlement_id, weight, height, muac_mm, oedema_status, visit_type, measurement_position, age_in_months_at_visit):
     """Records a new screening visit and its corresponding measurements."""
     visit_date = date.today().isoformat()
-    
+
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
@@ -12,18 +12,18 @@ def record_screening_visit(db_path, child_id, officer_id, settlement_id, weight,
         # 1. Create the visit record
         cursor.execute('''
             INSERT INTO screening_visits (
-                child_id, officer_id, settlement_id, visit_date
-            ) VALUES (?, ?, ?, ?)
-        ''', (child_id, officer_id, settlement_id, visit_date))
+                child_id, officer_id, settlement_id, visit_date, visit_type, age_in_months_at_visit
+            ) VALUES (?, ?, ?, ?, ?, ?)
+        ''', (child_id, officer_id, settlement_id, visit_date, visit_type, age_in_months_at_visit))
         
         visit_id = cursor.lastrowid
         
         # 2. Create the linked measurement record
         cursor.execute('''
             INSERT INTO measurements (
-                visit_id, weight_kg, height_length_cm, muac_mm, oedema_status
-            ) VALUES (?, ?, ?, ?, ?)
-        ''', (visit_id, weight, height, muac_mm, oedema_status))
+                visit_id,child_id, weight_kg, height_length_cm, muac_mm, oedema_status, measurement_position
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (visit_id, child_id, weight, height, muac_mm, oedema_status, measurement_position))
 
         
         conn.commit()
@@ -47,12 +47,12 @@ def get_latest_screening_visit(db_path, child_string_id):
     try:
         # Join the tables to find the child's most recent visit and measurements
         cursor.execute('''
-            SELECT s.id AS visit_id, m.muac_mm, m.oedema_status
+            SELECT s.visit_id AS visit_id, m.muac_mm, m.oedema_status
             FROM children c
-            JOIN screening_visits s ON c.id = s.child_id
-            JOIN measurements m ON s.id = m.visit_id
+            JOIN screening_visits s ON c.child_id = s.child_id
+            JOIN measurements m ON s.visit_id = m.visit_id
             WHERE c.child_id = ?
-            ORDER BY s.visit_date DESC, s.id DESC
+            ORDER BY s.visit_date DESC, s.visit_id DESC
             LIMIT 1
         ''', (child_string_id,))
         
