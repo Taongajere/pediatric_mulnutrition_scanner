@@ -51,8 +51,7 @@ def init_db(db_path = "data/nutri_track.db"):
             settlement_id INTEGER NOT NULL,
             visit_date DATE NOT NULL,
             visit_type TEXT,
-            age_days_at_visit INTEGER,
-            age_basis TEXT,
+            age_in_months_at_visit INTEGER,
             FOREIGN KEY (child_id) REFERENCES children (child_id),
             FOREIGN KEY (officer_id) REFERENCES officers (officer_id),
             FOREIGN KEY (settlement_id) REFERENCES settlements (settlement_id)
@@ -64,13 +63,14 @@ def init_db(db_path = "data/nutri_track.db"):
         CREATE TABLE IF NOT EXISTS measurements (
             measurement_id INTEGER PRIMARY KEY AUTOINCREMENT,
             visit_id INTEGER UNIQUE NOT NULL,
+            child_id TEXT NOT NULL,
             weight_kg REAL,
             height_length_cm REAL,
-            measurement_position TEXT,
             muac_mm REAL,
             oedema_status TEXT,
-            quality_validity TEXT,
+            measurement_position TEXT,
             FOREIGN KEY (visit_id) REFERENCES screening_visits (visit_id)
+            FOREIGN KEY (child_id) REFERENCES children (child_id)
         )
     ''')
 
