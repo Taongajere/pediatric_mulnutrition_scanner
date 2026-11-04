@@ -12,7 +12,7 @@ from nutri_track.screening import record_screening_visit, get_latest_screening_v
 from nutri_track.assesment import calculate_assessment, save_assessment
 from nutri_track.referals import create_referral
 from nutri_track.enrollment import enroll_child
-from nutri_track.reports import export_assessments_to_csv
+from nutri_track.reports import export_child_visits_to_csv, export_all_visits_to_csv
 
 console = Console()
 
@@ -285,28 +285,45 @@ def ui_enroll_child(child_id=None):
     return enrolment_id
 
 def ui_export_data():
-    header("\n--- Export Data ---")
-    filename = input("Enter output filename (default: data_export.csv): ").strip()
-    
-    # Apply default filename if user just presses Enter
-    if not filename:
-        filename = "data_export.csv"
-        
-    # Ensure it ends with .csv
-    if not filename.endswith(".csv"):
-        filename += ".csv"
-        
-    success(f"Extracting records to {filename}...")
-    
-    with console.status("[bold green]Exporting data...[/]", spinner="dots"):
-        rows_exported = export_assessments_to_csv("data/nutritrack.db", filename)
-    
-    if rows_exported is not None:
-        success(f"Success! {rows_exported} screening records exported to {filename}.")
+    header("--- Export Screening Data ---")
+
+    console.print("1. Export one child's screening history")
+    console.print("2. Export all children's screening histories")
+
+    choice = Prompt.ask(
+        "Choose an export option",
+        choices=["1", "2"]
+    )
+
+    if choice == "1":
+        child_id = Prompt.ask("Enter child's ID").strip().upper()
+
+        if not child_id:
+            error("Child ID cannot be empty.")
+            return
+
+        filename = f"data/screening_{child_id}.csv"
+
+        rows = export_child_visits_to_csv(
+            "data/nutritrack.db",
+            child_id,
+            filename,          
+        )
+
     else:
-        error("Failed to export data.")
-        
-    return rows_exported
+        filename = "data/all_screening_visits.csv"
+
+        rows = export_all_visits_to_csv(
+            "data/nutritrack.db",
+            filename
+        )
+
+    if rows is None:
+        error("Export failed. Check the database and output path.")
+    elif rows == 0:
+        warn("No screening visits found. No file was created.")
+    else:
+        success(f"{rows} screening visits exported to {filename}")
 
 
 if __name__ == "__main__":
