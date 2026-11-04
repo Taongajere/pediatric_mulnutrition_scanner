@@ -227,7 +227,7 @@ def ui_calculate_assessment():
     
     # flag assesment to automatically trigger referral if SAM is detected
     if "Severe" in assessment['muac_classification']:
-        error("\n*** URGENT: SAM DETECTED ***")
+        print("\n*** URGENT: SAM DETECTED ***")
         refer = input("Would you like to issue a referral now? (yes/no): ").strip().lower()
         if refer == 'yes':
             # Pass the known IDs directly to the referral function
