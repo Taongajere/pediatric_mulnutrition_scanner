@@ -1,0 +1,5 @@
+﻿child_id,date_of_birth,sex,registration_date,visit_id,visit_date,visit_type,age_in_months_at_visit,weight_kg,height_length_cm,muac_mm,oedema_status,measurement_position,waz,haz,whz,muac_classification,overall_flag
+S01-NUTRI-001,2024-01-15,M,2026-11-04,1,2026-11-04,screening,33,7.0,75.0,110.0,absent,lying,,,,Severe Acute Malnutrition (SAM),Requires urgent clinical review (MUAC < 115mm)
+S01-NUTRI-001,2024-01-15,M,2026-11-04,2,2026-11-04,follow-up,33,7.1,75.2,112.0,absent,lying,,,,Severe Acute Malnutrition (SAM),Requires urgent clinical review (MUAC < 115mm)
+S01-NUTRI-002,2024-08-20,M,2026-11-04,3,2026-11-04,screening,26,8.0,82.0,112.0,absent,lying,,,,Severe Acute Malnutrition (SAM),Requires urgent clinical review (MUAC < 115mm)
+S01-NUTRI-002,2024-08-20,M,2026-11-04,4,2026-11-04,follow-up,26,8.1,82.2,113.0,absent,lying,,,,Severe Acute Malnutrition (SAM),Requires urgent clinical review (MUAC < 115mm)
