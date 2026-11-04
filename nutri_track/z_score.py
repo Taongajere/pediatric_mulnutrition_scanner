@@ -28,6 +28,7 @@ def calculate_wfh_zscore(age_at_visit, sex, height_cm, weight_kg):
     file_path = f"data/WHO-2006-standards/{begin}_{sex.lower()}_{age_group}_zscores.xlsx"
 
     df = pd.read_excel(file_path)
+    df.columns = df.columns.str.strip()
 
     # Ensure numerical values
     height_column = 'Length' if begin == 'wfl' else 'Height'
@@ -86,6 +87,7 @@ def calculate_lhfa_zscore(age_at_visit, sex, height_cm):
     file_path = f"data/WHO-2006-standards/lhfa_{sex.lower()}_{age_group}_zscores.xlsx"
 
     df = pd.read_excel(file_path)
+    df.columns = df.columns.str.strip()
 
     # find age value
     if age_at_visit < 3:
@@ -139,6 +141,7 @@ def calculate_wfa_zscore(age_at_visit, sex, weight_kg):
     file_path = f"data/WHO-2006-standards/wfa_{sex.lower()}_{age_group}_zscores.xlsx"
 
     df = pd.read_excel(file_path)
+    df.columns = df.columns.str.strip()
 
     # find age value
     if age_at_visit < 3:
