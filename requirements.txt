@@ -1,5 +1,7 @@
 Typer
 pandas 
+numpy
 pytest 
 ipykernel 
+openpyxl
 rich  # https://github.com/Textualize/rich - repo that helps with ui and output in the CLI
