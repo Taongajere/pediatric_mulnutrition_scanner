@@ -223,7 +223,7 @@ def ui_calculate_assessment():
     if saved_id:
         success(f"Assessment saved automatically with ID {saved_id}.")
     else:
-        error("Failed to save assessment to the database.")
+        error(f"Assessment with ID {visit_id} for {child_id} already saved or failed to save. Check the database for existing records.")
     
     # flag assesment to automatically trigger referral if SAM is detected
     if "Severe" in assessment['muac_classification']:
