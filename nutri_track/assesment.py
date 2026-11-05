@@ -1,39 +1,129 @@
 import sqlite3
 from datetime import date
+from .z_score import calculate_lhfa_zscore, calculate_wfa_zscore, calculate_wfh_zscore
 
-def calculate_assessment(muac_mm, oedema_status):
+def calculate_assessment(db_path, visit_id):
     """
     Evaluates inputs based on the WHO 2013 Management of SAM guidelines.
     Outputs safe screening flags without claiming definitive medical diagnosis.
     """
-    assessment = {
-        "standard_version": "WHO Child Growth Standards",
-        "protocol_version": "WHO_Management_of_SAM_2013",
-        "overall_flag": "No acute malnutrition flagged",
-        "muac_classification": "Normal",
-        "waz": None, 
-        "haz": None,
-        "whz": None
-    }
 
-    # WHO SAM Criteria 1: Bilateral pitting oedema is an independent indicator of SAM
-    if oedema_status and oedema_status.lower() == "present":
-        assessment["muac_classification"] = "Severe Acute Malnutrition (SAM)"
-        assessment["overall_flag"] = "Requires urgent clinical review (Bilateral pitting oedema present)"
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    try: 
+        # Retrieve child screening information
+        query = '''
+            SELECT
+                c.child_id,
+                c.sex,
+                sv.visit_id,
+                sv.age_in_months_at_visit,
+                m.weight_kg,
+                m.height_length_cm,
+                m.muac_mm,
+                m.oedema_status 
+            FROM children AS c
+            INNER JOIN screening_visits AS sv
+                ON sv.child_id = c.child_id
+            LEFT JOIN measurements AS m 
+                ON m.visit_id = sv.visit_id
+            WHERE sv.visit_id = ?
+                
+        '''
+
+        cursor.execute(query, (visit_id,))
+        visit = cursor.fetchone()
+
+        if visit is None:
+            raise ValueError('Screening visit not found.') 
+
+        #Retrieve the measurements
+        age_at_visit = visit["age_in_months_at_visit"]
+        sex = visit["sex"]
+        weight_kg = visit["weight_kg"]
+        height_cm = visit["height_length_cm"]
+        muac_mm = visit["muac_mm"]
+        oedema_status = visit["oedema_status"]
+
+        # Validate required measurements
+        if any(value is None for value in [
+            age_at_visit,
+            sex,
+            weight_kg,
+            height_cm,
+            muac_mm,
+        ]):
+            raise ValueError("Incomplete screening measurements.")
+
+        #Calculate Weight-for-Age Z-score (WAZ)
+        waz = calculate_wfa_zscore(
+            age_at_visit,
+            sex,
+            weight_kg
+        )
+
+        # Calculate Weight-for-Height/Length Z-score (WHZ)
+        whz = calculate_wfh_zscore(
+            age_at_visit,
+            sex,
+            height_cm,
+            weight_kg
+        )
+
+        # Calculate Length/Height-for-Age Z-score (HAZ)
+        haz = calculate_lhfa_zscore(
+            age_at_visit,
+            sex,
+            height_cm,
+        )
+
+        # Classify MUAC
+        if age_at_visit < 6:
+            muac_classification = "Not classified using 6-59 month cut-offs"
+
+        elif muac_mm < 115:
+            muac_classification = "Severe acute malnutrition"
+
+        elif muac_mm < 125:
+            muac_classification = "Moderate acute malnutrition"
+
+        else:
+            muac_classification = "Normal"
+
+        # Determine overall screening flag
+        if str(oedema_status).strip().lower() in [
+            "present", "bilateral pitting oedema"
+        ]:
+            overall_flag = "Bilateral oedema: urgent clinical assessment"
+
+        elif whz < -3 or (age_at_visit >= 6 and muac_mm < 115):
+            overall_flag = "Severe acute malnutrition: urgent referral"
+
+        elif whz < -2 or (age_at_visit >= 6 and muac_mm < 125):
+            overall_flag = "Moderate acute malnutrition: referral required"
+
+        else:
+            overall_flag = "No acute malnutrition flagged"
+
+        # Return all four indicators
+        assessment = {
+            "standard_version": "WHO Child Growth Standards",
+            "protocol_version": "WHO_Management_of_SAM_2013",
+
+            "waz": waz,
+            "haz": haz,
+            "whz": whz,
+
+            "muac_classification": muac_classification,
+
+            "overall_flag": overall_flag
+        }
+
         return assessment
 
-    # WHO SAM Criteria 2: MUAC thresholds for children 6-59 months
-    if muac_mm:
-        if muac_mm < 115.0:
-            assessment["muac_classification"] = "Severe Acute Malnutrition (SAM)"
-            assessment["overall_flag"] = "Requires urgent clinical review (MUAC < 115mm)"
-        elif 115.0 <= muac_mm < 125.0:
-            assessment["muac_classification"] = "Moderate Acute Malnutrition (MAM)"
-            assessment["overall_flag"] = "Requires assessment (115 <= MUAC < 125mm)"
-    else:
-        assessment["overall_flag"] = "Incomplete assessment: MUAC not provided"
-
-    return assessment
+    finally:
+        conn.close()
 
 def save_assessment(db_path, visit_id, assessment_data):
     """Saves the assessment outputs to the database."""

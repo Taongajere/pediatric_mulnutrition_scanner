@@ -91,7 +91,7 @@ def calculate_lhfa_zscore(age_at_visit, sex, height_cm):
 
     # find age value
     if age_at_visit < 3:
-        age_value = age_at_visit / 4.348125
+        age_value = age_at_visit * 4.348125
         age_column = 'Week'
     else:
         age_value = age_at_visit 
@@ -145,7 +145,7 @@ def calculate_wfa_zscore(age_at_visit, sex, weight_kg):
 
     # find age value
     if age_at_visit < 3:
-        age_value = age_at_visit / 4.348125
+        age_value = age_at_visit * 4.348125
         age_column = 'Week'
     else:
         age_value = age_at_visit 

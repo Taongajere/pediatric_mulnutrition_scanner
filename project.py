@@ -102,7 +102,7 @@ def ui_register_new_child():
     #-------------------------------------------------------------------------------------
 
     dob_is_estimated = input("Is the date of birth estimated? (yes/no): ").strip().lower() == 'yes'
-    child_id = register_child("data/nutritrack.db", date_of_birth, dob_is_estimated, age_in_months * 12, sex, "S01")  # Assuming settlement_id is "S01" for simplicity
+    child_id = register_child("data/nutritrack.db", date_of_birth, dob_is_estimated, age_in_months, sex, "S01")  # Assuming settlement_id is "S01" for simplicity
     success(f'success! Child ID is {child_id}' if child_id else 'Failed to register child.')
     return child_id
 
@@ -170,15 +170,16 @@ def ui_calculate_assessment():
 
     visit_id = visit['visit_id']
 
-    assessment = calculate_assessment(visit['muac_mm'], visit['oedema_status'])
-        # Extract assessment information
-    classification = assessment['muac_classification']
-    overall_flag = assessment['overall_flag']
+    assessment = calculate_assessment('data/nutritrack.db', visit_id)
+
+    muac_classification = assessment.get("muac_classification", "Not assessed")
+    classification = muac_classification
+    overall_flag = assessment.get("overall_flag", "No action specified")
 
      # Pick colour, label and icon from severity
-    if "Severe" in classification:
+    if "Severe" in muac_classification:
         color, icon, status = "red", "🚨", "URGENT: SEVERE ACUTE MALNUTRITION"
-    elif "Moderate" in classification:
+    elif "Moderate" in muac_classification:
         color, icon, status = "yellow", "⚠️ ", "WARNING: MODERATE MALNUTRITION"
     else:
         color, icon, status = "green", "✅", "NORMAL NUTRITIONAL STATUS"
@@ -211,10 +212,8 @@ def ui_calculate_assessment():
         ("Weight-for-height (WHZ)", "whz"),
     ]:
         value = assessment[key]
-        indicators.add_row(
-            label,
-            f"{value}" if value is not None else "[dim]Not assessed[/]",
-        )
+        result = f"{value:.2f} SD" if value is not None else "[dim]Not assessed[/]"
+        indicators.add_row(label, result)
 
     console.print(indicators)
     
