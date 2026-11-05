@@ -16,10 +16,11 @@ def calculate_assessment(db_path, visit_id):
         query = '''
             SELECT
                 c.child_id,
-                c.date_of_birth
+                c.date_of_birth,
                 c.sex,
                 sv.visit_id,
                 sv.age_in_months_at_visit,
+                sv.visit_date,
                 m.weight_kg,
                 m.height_length_cm,
                 m.muac_mm,
@@ -41,7 +42,7 @@ def calculate_assessment(db_path, visit_id):
             raise ValueError('Screening visit not found.') 
 
         #Retrieve the measurements
-        age_at_visit = visit["age_in_months_at_visit"]
+        visit_date = visit["visit_date"]
         sex = visit["sex"]
         date_of_birth = visit["date_of_birth"]
         weight_kg = visit["weight_kg"]
@@ -49,10 +50,11 @@ def calculate_assessment(db_path, visit_id):
         muac_mm = visit["muac_mm"]
         oedema_status = visit["oedema_status"]
         measurement_position = visit['measurement_position']
+        age_at_visit = visit['age_in_months_at_visit']
 
         # Validate required measurements
         if any(value is None for value in [
-            age_at_visit,
+            visit_date,
             sex,
             weight_kg,
             height_cm,
@@ -65,37 +67,19 @@ def calculate_assessment(db_path, visit_id):
         #Calculate z_scores using WHO - R packgae
         z_scores = calculate_who_zscores(
             date_of_birth = date_of_birth,
-            age_at_visit = age_at_visit,
+            visit_date = visit_date,
             sex = sex,
-            weight_kg = weight_kg,
-            height_cm = height_cm,
-            muac_mm = muac_mm,
-            oedema_status = oedema_status,
+            weight = weight_kg,
+            height = height_cm,
+            muac = muac_mm,
+            oedema  = oedema_status,
             measurement_position = measurement_position
         )
+        # returns
+        waz = z_scores['zwei'] #outputs from R script 
+        haz = z_scores['zlen'] #outputs from R script
+        whz = z_scores['zwfl'] #outputs from R script
 
-
-        #Calculate Weight-for-Age Z-score (WAZ)
-        waz = calculate_wfa_zscore(
-            age_at_visit,
-            sex,
-            weight_kg
-        )
-
-        # Calculate Weight-for-Height/Length Z-score (WHZ)
-        whz = calculate_wfh_zscore(
-            age_at_visit,
-            sex,
-            height_cm,
-            weight_kg
-        )
-
-        # Calculate Length/Height-for-Age Z-score (HAZ)
-        haz = calculate_lhfa_zscore(
-            age_at_visit,
-            sex,
-            height_cm,
-        )
 
         # Classify MUAC
         if age_at_visit < 6:

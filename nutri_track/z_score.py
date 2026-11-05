@@ -14,7 +14,8 @@ RSCRIPT = os.environ.get("RSCRIPT_PATH", "Rscript")
 
 
 def calculate_who_zscores(
-    age_days,
+    date_of_birth,
+    visit_date,
     sex,
     weight,
     height,
@@ -24,10 +25,10 @@ def calculate_who_zscores(
 ):
     """Use WHO Anthro in R to calculate Z-scores."""
 
-    # # convert years in days
-    # dob = date.fromisoformat(date_of_birth)
-    # visit_dt = date.fromisoformat(age_at_visit)
-    # age_days = (visit_dt - dob).days
+    # convert years in days
+    dob = date.fromisoformat(date_of_birth)
+    visit_dt = date.fromisoformat(visit_date)
+    age_days = (visit_dt - dob).days
 
     if age_days < 0:
         raise ValueError("Visit date cannot precede date of birth.")
