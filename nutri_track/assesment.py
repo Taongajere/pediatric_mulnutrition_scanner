@@ -1,6 +1,6 @@
 import sqlite3
 from datetime import date
-from .z_score import calculate_lhfa_zscore, calculate_wfa_zscore, calculate_wfh_zscore
+from .z_score import calculate_lhfa_zscore, calculate_wfa_zscore, calculate_wfh_zscore, calculate_who_zscores
 
 def calculate_assessment(db_path, visit_id):
     """
@@ -16,13 +16,15 @@ def calculate_assessment(db_path, visit_id):
         query = '''
             SELECT
                 c.child_id,
+                c.date_of_birth
                 c.sex,
                 sv.visit_id,
                 sv.age_in_months_at_visit,
                 m.weight_kg,
                 m.height_length_cm,
                 m.muac_mm,
-                m.oedema_status 
+                m.oedema_status,
+                m.measurement_position
             FROM children AS c
             INNER JOIN screening_visits AS sv
                 ON sv.child_id = c.child_id
@@ -41,10 +43,12 @@ def calculate_assessment(db_path, visit_id):
         #Retrieve the measurements
         age_at_visit = visit["age_in_months_at_visit"]
         sex = visit["sex"]
+        date_of_birth = visit["date_of_birth"]
         weight_kg = visit["weight_kg"]
         height_cm = visit["height_length_cm"]
         muac_mm = visit["muac_mm"]
         oedema_status = visit["oedema_status"]
+        measurement_position = visit['measurement_position']
 
         # Validate required measurements
         if any(value is None for value in [
@@ -53,8 +57,23 @@ def calculate_assessment(db_path, visit_id):
             weight_kg,
             height_cm,
             muac_mm,
+            oedema_status, 
+            measurement_position, 
         ]):
             raise ValueError("Incomplete screening measurements.")
+
+        #Calculate z_scores using WHO - R packgae
+        z_scores = calculate_who_zscores(
+            date_of_birth = date_of_birth,
+            age_at_visit = age_at_visit,
+            sex = sex,
+            weight_kg = weight_kg,
+            height_cm = height_cm,
+            muac_mm = muac_mm,
+            oedema_status = oedema_status,
+            measurement_position = measurement_position
+        )
+
 
         #Calculate Weight-for-Age Z-score (WAZ)
         waz = calculate_wfa_zscore(
