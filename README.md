@@ -1,5 +1,5 @@
 # NutriTrack: Child Nutrition Screening System
-#### Video Demo : 
+#### Video Demo : https://youtu.be/xJhkjYO60HU
 
 
 NutriTrack is a Command Line Interface (CLI) application designed to help health workers track, manage, and assess child nutritional health. It streamlines the process of registering children, recording screening visits, calculating World Health Organization (WHO) anthropometric Z-scores, and managing clinical interventions like referrals and feeding program enrollments.
