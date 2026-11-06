@@ -1,6 +1,6 @@
 import sqlite3
 from datetime import date
-from .z_score import calculate_lhfa_zscore, calculate_wfa_zscore, calculate_wfh_zscore, calculate_who_zscores
+from .z_score import calculate_who_zscores
 
 def calculate_assessment(db_path, visit_id):
     """

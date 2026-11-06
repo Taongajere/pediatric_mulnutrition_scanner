@@ -85,7 +85,7 @@ def calculate_who_zscores(
         raise RuntimeError(
             f"Invalid response from R: {process.stdout}")
 
-
+# native calculate z_scores with the tables
 def calculate_wfh_zscore(age_at_visit, sex, height_cm, weight_kg):
     """
     Calculate Weight-for-Height Z-score using WHO LMS standards.
